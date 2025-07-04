@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_GOOGLE });
 
@@ -19,9 +19,58 @@ async function ask(prompt) {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
+     config: {
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.text,
+
+    }}
   });
   return response.text;
 }
+
+async function askgptGETDocs(prompt) {
+const response = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+  config: {
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.OBJECT,
+      properties: {
+        explanation: { type: Type.STRING },
+        docs: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              titulo: { type: Type.STRING },
+              capitulo: { type: Type.STRING },
+              numero_de_capitulo: { type: Type.NUMBER },
+              articulo: { type: Type.NUMBER },
+              titulo_de_articulo: { type: Type.STRING },
+              contenido: { type: Type.STRING },
+            },
+            propertyOrdering: [
+              "titulo",
+              "capitulo",
+              "numero_de_capitulo",
+              "articulo",
+              "titulo_de_articulo",
+              "contenido"
+            ],
+          }
+        }
+      },
+      propertyOrdering: ["explanation", "docs"]
+    }
+  }
+});
+
+
+  return response.text;
+}
+
 
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'index.html'));
@@ -29,11 +78,23 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('chat message', async (msg) => {
-        console.log(msg === "hola")
-        io.emit('chat message', msg)
-        const res = await search(await ask("comvierte esta pregunta a solo las palabras claves ejemplo: ¿Que es un vector normal? = vector normal" + msg));
+        console.log(msg)
+        const res = await search(msg);
         console.log(res)
-        const aiRes = await ask(JSON.stringify(res) + "base on this responde this in detail and give the important document parts  i a beautiful html inside a <div> all your response is inside a div format: " + msg);
+        const estatutoJSON = JSON.stringify(res);
+
+        const prompt = `
+        Usa exclusivamente la siguiente información del estatuto universitario para responder AL TEXTO que te DARÉ. No inventes respuestas fuera de este contexto.
+
+        Documentos del estatuto:
+        ${estatutoJSON}
+
+        Pregunta:
+        ${msg}
+
+        Por favor, responde con claridad y precisión basándote solo en los documentos proporcionados. solo devuelve los articulos relevantes
+        `;
+        const aiRes = await askgptGETDocs(prompt);
         console.log(aiRes)
         io.emit('chat message',aiRes);
   });

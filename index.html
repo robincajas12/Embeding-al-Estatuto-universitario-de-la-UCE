@@ -1,48 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Socket.IO chat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat en vivo</title>
   <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+    #messages {
+      list-style: none;
+      padding: 0.1rem;
+      margin: 0;
+      max-height: 75vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #bdc9ff; }
+    #messages li {
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      max-width: 80%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    li.self {
+      background-color: #cdefff;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    li.other {
+      background-color: #ffffff;
+      align-self: flex-start;
+      text-align: left;
+    }
+
+    .json-doc p {
+      margin: 0.1rem 0;
+    }
+
+    .json-doc .label {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .json-doc .content {
+      color: #444;
+    }
+
+    form {
+      display: flex;
+      padding: 10px;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      position: sticky;
+      bottom: 0;
+    }
+
+    input#input {
+      flex: 1;
+      padding: 0.2rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 0.2rem 0.5rem;
+      margin-left: 10px;
+      font-size: 1rem;
+      border: none;
+      background-color: #2196f3;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1976d2;
+    }
+
+    .doc-container {
+      margin-bottom: 0.5rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
   </style>
 </head>
 <body>
-  <div id="messages"></div>
-  <form id="form" action="">
-    <input id="input" autocomplete="off" /><button>Send</button>
+  <ul id="messages"></ul>
+
+  <form id="form" autocomplete="off">
+    <input id="input" placeholder="Escribe un mensaje..." />
+    <button type="submit">Enviar</button>
   </form>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (input.value) {
-        socket.emit('chat message', input.value);
+      const msg = input.value.trim();
+      if (msg) {
+        addMessage(msg, 'self');
+        socket.emit('chat message', msg);
         input.value = '';
       }
     });
 
-    socket.on('chat message', (msg) => {
-  const item = document.createElement('div');
-  item.innerHTML = "<div>" + msg + "</div>";
-  messages.appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+    socket.on('chat message', function (msg) {
+      addMessage(msg, 'other');
     });
+
+    function addMessage(msg, type) {
+      const li = document.createElement('li');
+      li.className = type;
+
+      try {
+        const data = typeof msg === 'string' ? JSON.parse(msg) : msg;
+
+        if (data && data.explanation && Array.isArray(data.docs)) {
+          li.innerHTML = renderStructuredDocs(data);
+        } else {
+          li.textContent = msg;
+        }
+      } catch (e) {
+        li.textContent = msg;
+      }
+
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function renderStructuredDocs(data) {
+      let html = `
+        <div class="json-doc">
+          <p><span class="label">💬 Explicación:</span> <span class="content">${data.explanation}</span></p>
+      `;
+
+      data.docs.forEach((doc, index) => {
+        html += `
+          <div class="doc-container">
+            <p><span class="label"> Documento #${index + 1}</span></p>
+            <p><span class="label"> Título:</span> <span class="content">${doc.titulo}</span></p>
+            <p><span class="label"> Capítulo:</span> <span class="content">${doc.capitulo}</span></p>
+            <p><span class="label"> Número de capítulo:</span> <span class="content">${doc.numero_de_capitulo}</span></p>
+            <p><span class="label"> Artículo:</span> <span class="content">${doc.articulo}</span></p>
+            <p><span class="label"> Título del artículo:</span> <span class="content">${doc.titulo_de_articulo}</span></p>
+            <p><span class="label"> Contenido:</span><br><span class="content">${doc.contenido}</span></p>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      return html;
+    }
   </script>
 </body>
 </html>

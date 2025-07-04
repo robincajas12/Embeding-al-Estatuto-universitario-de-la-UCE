@@ -58,14 +58,8 @@ async function updateEmbeddings() {
 
   for (const doc of docs) {
     const textToEmbed = `
-      Título: ${doc.titulo}
-      Capítulo: ${doc.capitulo}
-      Número de capítulo: ${doc.numero_de_capitulo}
-      Artículo: ${doc.articulo}
-      Título de artículo: ${doc.titulo_de_articulo}
-      Contenido: ${doc.contenido}
-      Etiquetas: ${doc.etiquetas?.join(', ')}
-      Preguntas sugeridas: ${doc.preguntas_sugeridas?.join(' | ')}
+      ${doc.titulo_de_articulo}
+      ${doc.contenido}
     `;
 
     try {
@@ -83,13 +77,14 @@ async function search(text, numCandidates = 100, limit = 3) {
   await connectDB();
 
   try {
+    console.log(text)
     const queryVector = await getEmbedding(text);
     console.log("Vector generado para búsqueda");
 
 const results = await Estatuto.aggregate([
   {
     $vectorSearch: {
-      index: "estatuto_embedding",
+      index: "default",
       path: "embedding",
       queryVector: queryVector,      // tu vector de 512 floats
       numCandidates: numCandidates,              // cuántos candidatos considera internamente
