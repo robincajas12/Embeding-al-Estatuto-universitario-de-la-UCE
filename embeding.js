@@ -11,13 +11,15 @@ const estatutoSchema = new mongoose.Schema({
   titulo: String,
   capitulo: String,
   numero_de_capitulo: Number,
-  articulo: String,
+  articulo: mongoose.Schema.Types.Mixed, // Puede ser número o string
   titulo_de_articulo: String,
   contenido: String,
+  etiquetas: [String],
+  preguntas_sugeridas: [String],
   embedding: [Number],
 });
 
-const Estatuto = mongoose.model("estatuto_universitario", estatutoSchema, "estatuto_universitario");
+const Estatuto = mongoose.model("estatuto_universitario_v2", estatutoSchema, "estatuto_universitario_v2");
 
 // Singleton para la conexión a MongoDB
 async function connectDB() {
@@ -56,7 +58,14 @@ async function updateEmbeddings() {
 
   for (const doc of docs) {
     const textToEmbed = `
-      ${doc.contenido}
+      Título: ${doc.titulo}
+      Capítulo: ${doc.capitulo}
+      Número de capítulo: ${doc.numero_de_capitulo}
+      Artículo: ${doc.articulo}
+      Título de artículo: ${doc.titulo_de_articulo}
+      Contenido: ${doc.contenido}
+      Etiquetas: ${doc.etiquetas?.join(', ')}
+      Preguntas sugeridas: ${doc.preguntas_sugeridas?.join(' | ')}
     `;
 
     try {
