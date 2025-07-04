@@ -60,7 +60,7 @@ async function updateEmbeddings() {
     const textToEmbed = `
       ${doc.titulo_de_articulo}
       ${doc.contenido}
-      ${doc.preguntas_sugeridas}}
+     ${/*doc.preguntas_sugeridas*/""}}
     `;
 
     try {

@@ -4,97 +4,103 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat en vivo</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-    }
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
 
-    #messages {
-      list-style: none;
-      padding: 0.1rem;
-      margin: 0;
-      max-height: 75vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
+  body {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+  }
 
-    #messages li {
-      margin: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      max-width: 80%;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
+  #messages {
+    list-style: none;
+    padding: 0.1rem;
+    margin: 0;
+    flex: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
 
-    li.self {
-      background-color: #cdefff;
-      align-self: flex-end;
-      text-align: right;
-    }
+  #messages li {
+    margin: 1rem;
+    padding: 1rem;
+    border-radius: 10px;
+    max-width: 80%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
 
-    li.other {
-      background-color: #ffffff;
-      align-self: flex-start;
-      text-align: left;
-    }
+  li.self {
+    background-color: #cdefff;
+    align-self: flex-end;
+    text-align: right;
+  }
 
-    .json-doc p {
-      margin: 0.1rem 0;
-    }
+  li.other {
+    background-color: #ffffff;
+    align-self: flex-start;
+    text-align: left;
+  }
 
-    .json-doc .label {
-      font-weight: bold;
-      color: #2c3e50;
-    }
+  form {
+    display: flex;
+    padding: 10px;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+    position: sticky;
+    bottom: 0;
+  }
 
-    .json-doc .content {
-      color: #444;
-    }
+  input#input {
+    flex: 1;
+    padding: 0.2rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
 
-    form {
-      display: flex;
-      padding: 10px;
-      background: #ffffff;
-      border-top: 1px solid #ddd;
-      position: sticky;
-      bottom: 0;
-    }
+  button {
+    padding: 0.2rem 0.5rem;
+    margin-left: 10px;
+    font-size: 1rem;
+    border: none;
+    background-color: #2196f3;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-    input#input {
-      flex: 1;
-      padding: 0.2rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+  button:hover {
+    background-color: #1976d2;
+  }
 
-    button {
-      padding: 0.2rem 0.5rem;
-      margin-left: 10px;
-      font-size: 1rem;
-      border: none;
-      background-color: #2196f3;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+  .json-doc p {
+    margin: 0.1rem 0;
+  }
 
-    button:hover {
-      background-color: #1976d2;
-    }
+  .json-doc .label {
+    font-weight: bold;
+    color: #2c3e50;
+  }
 
-    .doc-container {
-      margin-bottom: 0.5rem;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-  </style>
+  .json-doc .content {
+    color: #444;
+  }
+
+  .doc-container {
+    margin-bottom: 0.5rem;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+</style>
+
 </head>
 <body>
   <ul id="messages"></ul>
@@ -148,7 +154,7 @@
     function renderStructuredDocs(data) {
       let html = `
         <div class="json-doc">
-          <p><span class="label">💬 Explicación:</span> <span class="content">${data.explanation}</span></p>
+          <p><span class="label"> Explicación:</span> <span class="content">${data.explanation}</span></p>
       `;
 
       data.docs.forEach((doc, index) => {
