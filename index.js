@@ -21,7 +21,7 @@ async function ask(prompt) {
     contents: prompt,
      config: {
     responseMimeType: "application/json",
-    systemInstruction: "Dame las palabras clave en este texto, ejemplo: Cuales son los valores de la institución responder: 'valores de la institución'",
+    systemInstruction: "Eres un experto en transformar preguntas en lenguaje común a palabras clave legales precisas para buscar en un estatuto universitario. Cuando recibas un texto, extrae las palabras clave más relevantes para facilitar la búsqueda jurídica. Ejemplo: '¿Cuáles son los valores de la institución?' → 'valores de la institución'.",
     responseSchema: {
       type: Type.STRING,
 
@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
         const estatutoJSON = JSON.stringify(res);
 
         const prompt = `
-        Usa exclusivamente la siguiente información del estatuto universitario para responder AL TEXTO que te DARÉ. No inventes respuestas fuera de este contexto.
+        Usa exclusivamente la siguiente información del estatuto universitario para responder AL TEXTO que te DARÉ. No inventes respuestas fuera de este contexto. solo di no encontre nada relacionado en el label de explicacion
 
         Documentos del estatuto:
         ${estatutoJSON}
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
         Pregunta:
         ${msg}
 
-        Por favor, responde con claridad y precisión basándote solo en los documentos proporcionados. solo devuelve los articulos relevantes si no responder, 'no encontrado'
+        Por favor, responde con claridad y precisión basándote solo en los documentos proporcionados. solo devuelve los articulos relevantes
         `;
         const aiRes = await askgptGETDocs(prompt);
         console.log(aiRes)

@@ -58,9 +58,9 @@ async function updateEmbeddings() {
 
   for (const doc of docs) {
     const textToEmbed = `
-      ${doc.titulo_de_articulo}
+      ${doc.titulo_de_articulo ? doc.titulo_de_articulo : ""}
       ${doc.contenido}
-     ${/*doc.preguntas_sugeridas*/""}}
+     ${doc.etiquetas.join(',')}}
     `;
 
     try {
