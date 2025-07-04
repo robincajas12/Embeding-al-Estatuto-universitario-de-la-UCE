@@ -60,7 +60,8 @@ async function updateEmbeddings() {
     const textToEmbed = `
       ${doc.titulo_de_articulo ? doc.titulo_de_articulo : ""}
       ${doc.contenido}
-     ${doc.etiquetas.join(',')}}
+     ${doc.etiquetas.join(',')}
+     }
     `;
 
     try {
