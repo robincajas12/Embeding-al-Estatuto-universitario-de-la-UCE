@@ -60,6 +60,7 @@ async function updateEmbeddings() {
     const textToEmbed = `
       ${doc.titulo_de_articulo}
       ${doc.contenido}
+      ${doc.preguntas_sugeridas}}
     `;
 
     try {
@@ -73,7 +74,7 @@ async function updateEmbeddings() {
 }
 
 // Busca por texto usando búsqueda vectorial con índice 'estatuto_embedding'
-async function search(text, numCandidates = 100, limit = 3) {
+async function search(text, numCandidates = 300, limit = 3) {
   await connectDB();
 
   try {

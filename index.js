@@ -21,11 +21,13 @@ async function ask(prompt) {
     contents: prompt,
      config: {
     responseMimeType: "application/json",
+    systemInstruction: "Dame las palabras clave en este texto, ejemplo: Cuales son los valores de la institución responder: 'valores de la institución'",
     responseSchema: {
-      type: Type.text,
+      type: Type.STRING,
 
     }}
   });
+  console.log(response.text, "@@@@@@@@@@@@@@@@@@@@@@@@")
   return response.text;
 }
 
@@ -79,7 +81,7 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   socket.on('chat message', async (msg) => {
         console.log(msg)
-        const res = await search(msg);
+        const res = await search(ask(msg));
         console.log(res)
         const estatutoJSON = JSON.stringify(res);
 
@@ -92,7 +94,7 @@ io.on('connection', (socket) => {
         Pregunta:
         ${msg}
 
-        Por favor, responde con claridad y precisión basándote solo en los documentos proporcionados. solo devuelve los articulos relevantes
+        Por favor, responde con claridad y precisión basándote solo en los documentos proporcionados. solo devuelve los articulos relevantes si no responder, 'no encontrado'
         `;
         const aiRes = await askgptGETDocs(prompt);
         console.log(aiRes)
