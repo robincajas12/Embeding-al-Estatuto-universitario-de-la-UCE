@@ -75,12 +75,13 @@ async function updateEmbeddings() {
 }
 
 // Busca por texto usando búsqueda vectorial con índice 'estatuto_embedding'
-async function search(text, numCandidates = 300, limit = 3) {
+async function search(text, numCandidates = 300, limit = 5) {
+  console.log("buscooo: " + await text);
   await connectDB();
 
   try {
-    console.log(text)
-    const queryVector = await getEmbedding(text);
+    console.log(await text)
+    const queryVector = await getEmbedding(await text);
     console.log("Vector generado para búsqueda");
 
 const results = await Estatuto.aggregate([
