@@ -4,111 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat en vivo</title>
-<style>
-  html, body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
-    font-family: 'Segoe UI', sans-serif;
-    background: #f5f5f5;
-  }
-
-  #messages {
-    list-style: none;
-    padding: 0.1rem;
-    margin: 0;
-    flex: 1; /* Ocupa todo el espacio disponible */
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #messages li {
-    margin: 1rem;
-    padding: 1rem;
-    border-radius: 10px;
-    max-width: 80%;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  li.self {
-    background-color: #cdefff;
-    align-self: flex-end;
-    text-align: right;
-  }
-
-  li.other {
-    background-color: #ffffff;
-    align-self: flex-start;
-    text-align: left;
-  }
-
-  form {
-    display: flex;
-    padding: 10px;
-    background: #ffffff;
-    border-top: 1px solid #ddd;
-    position: sticky;
-    bottom: 0;
-  }
-
-  input#input {
-    flex: 1;
-    padding: 0.2rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  button {
-    padding: 0.2rem 0.5rem;
-    margin-left: 10px;
-    font-size: 1rem;
-    border: none;
-    background-color: #2196f3;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #1976d2;
-  }
-
-  .json-doc p {
-    margin: 0.1rem 0;
-  }
-
-  .json-doc .label {
-    font-weight: bold;
-    color: #2c3e50;
-  }
-
-  .json-doc .content {
-    color: #444;
-  }
-
-  .doc-container {
-    margin-bottom: 0.5rem;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-</style>
+<link rel="stylesheet" href="/style.css" />
 
 </head>
 <body>
-  <ul id="messages"></ul>
+  <div class="main-container">
+    <div class="chat-container">
+      <header>Chat en vivo</header>
+      <ul id="messages"></ul>
 
-  <form id="form" autocomplete="off">
-    <input id="input" placeholder="Escribe un mensaje..." />
-    <button type="submit">Enviar</button>
-  </form>
+      <form id="form" autocomplete="off">
+        <input id="input" placeholder="Escribe un mensaje..." />
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+    <div class="document-display-area">
+      <header>Documentos Relacionados</header>
+      <div id="document-content"></div>
+    </div>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -116,6 +30,7 @@
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
+    const documentContent = document.getElementById('document-content');
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -132,46 +47,74 @@
     });
 
     function addMessage(msg, type) {
-      const li = document.createElement('li');
-      li.className = type;
+      if (type === 'other') {
+        try {
+          const data = typeof msg === 'string' ? JSON.parse(msg) : msg;
 
-      try {
-        const data = typeof msg === 'string' ? JSON.parse(msg) : msg;
+          if (data && data.explanation && Array.isArray(data.docs)) {
+            // Añadir la explicación al chat
+            const explanationLi = document.createElement('li');
+            explanationLi.className = type;
+            explanationLi.textContent = data.explanation;
+            messages.appendChild(explanationLi);
 
-        if (data && data.explanation && Array.isArray(data.docs)) {
-          li.innerHTML = renderStructuredDocs(data);
-        } else {
-          li.textContent = msg;
+            // Limpiar y añadir los documentos al área de documentos
+            documentContent.innerHTML = '';
+            documentContent.innerHTML = renderStructuredDocs(data.docs);
+
+            messages.scrollTop = messages.scrollHeight;
+            return; // No añadir el mensaje JSON completo al chat
+          }
+        } catch (e) {
+          // Si no es JSON válido, se trata como un mensaje normal
         }
-      } catch (e) {
-        li.textContent = msg;
       }
 
+      const li = document.createElement('li');
+      li.className = type;
+      li.textContent = msg;
       messages.appendChild(li);
       messages.scrollTop = messages.scrollHeight;
     }
 
-    function renderStructuredDocs(data) {
-      let html = `
-        <div class="json-doc">
-          <p><span class="label"> Explicación:</span> <span class="content">${data.explanation}</span></p>
-      `;
+    function renderStructuredDocs(docs) {
+      let html = `<div class="docs-list">`;
 
-      data.docs.forEach((doc, index) => {
+      docs.forEach((doc, index) => {
         html += `
-          <div class="doc-container">
-            <p><span class="label"> Documento #${index + 1}</span></p>
-            <p><span class="label"> Título:</span> <span class="content">${doc.titulo}</span></p>
-            <p><span class="label"> Capítulo:</span> <span class="content">${doc.capitulo}</span></p>
-            <p><span class="label"> Número de capítulo:</span> <span class="content">${doc.numero_de_capitulo}</span></p>
-            <p><span class="label"> Artículo:</span> <span class="content">${doc.articulo}</span></p>
-            <p><span class="label"> Título del artículo:</span> <span class="content">${doc.titulo_de_articulo}</span></p>
-            <p><span class="label"> Contenido:</span><br><span class="content">${doc.contenido}</span></p>
-          </div>
+            <div class="doc-item">
+              <div class="doc-header">
+                <span class="doc-title-label">Documento #${index + 1}</span>
+              </div>
+              <div class="doc-field">
+                <span class="field-label">Título:</span>
+                <span class="field-content">${doc.titulo}</span>
+              </div>
+              <div class="doc-field">
+                <span class="field-label">Capítulo:</span>
+                <span class="field-content">${doc.capitulo}</span>
+              </div>
+              <div class="doc-field">
+                <span class="field-label">Número de capítulo:</span>
+                <span class="field-content">${doc.numero_de_capitulo}</span>
+              </div>
+              <div class="doc-field">
+                <span class="field-label">Artículo:</span>
+                <span class="field-content">${doc.articulo}</span>
+              </div>
+              <div class="doc-field">
+                <span class="field-label">Título del artículo:</span>
+                <span class="field-content">${doc.titulo_de_articulo}</span>
+              </div>
+              <details class="doc-content-details">
+                <summary class="field-label">Contenido:</summary>
+                <span class="field-content">${doc.contenido}</span>
+              </details>
+            </div>
         `;
       });
 
-      html += '</div>';
+      html += `</div>`;
       return html;
     }
   </script>
