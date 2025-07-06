@@ -11,9 +11,8 @@ html, body {
 .main-container {
   display: flex;
   width: 95%; /* Ancho total del contenedor principal */
-  height: 90%;
-  min-width: 80vw; /* Altura total del contenedor principal */
-  max-width: 90vw; /* Ancho máximo para el diseño de dos columnas */
+  height: 90%; /* Altura total del contenedor principal */
+  min-width: 95vw; /* Ancho máximo para el diseño de dos columnas */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   border-radius: 15px;
   overflow: hidden;
@@ -39,12 +38,30 @@ html, body {
 .document-display-area header {
   background-color: #42a5f5; /* Un azul diferente para el encabezado de documentos */
   color: white;
-  padding: 15px;
+  padding: 13px;
   text-align: center;
   font-size: 1.2rem;
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: -1rem -1rem 1rem -1rem; /* Ajusta para que ocupe todo el ancho */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.document-display-area header button {
+  background-color: #28a745; /* Color verde para el botón de descarga */
+  color: white;
+  border: none;
+  padding: 0px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.document-display-area header button:hover {
+  background-color: #218838;
 }
 
 header {

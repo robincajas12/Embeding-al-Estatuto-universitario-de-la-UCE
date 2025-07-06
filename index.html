@@ -19,12 +19,16 @@
       </form>
     </div>
     <div class="document-display-area">
-      <header>Documentos Relacionados</header>
+      <header>
+        Documentos Relacionados
+        <button id="save-pdf-btn" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">Guardar como PDF</button>
+      </header>
       <div id="document-content"></div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     const socket = io();
     const form = document.getElementById('form');
@@ -117,6 +121,12 @@
       html += `</div>`;
       return html;
     }
+
+    // PDF generation logic
+    document.getElementById('save-pdf-btn').addEventListener('click', function() {
+      const content = document.getElementById('document-content');
+      html2pdf().from(content).save('documentos_relacionados.pdf');
+    });
   </script>
 </body>
 </html>
