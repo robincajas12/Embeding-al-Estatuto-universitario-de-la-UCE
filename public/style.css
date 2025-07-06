@@ -12,7 +12,7 @@ html, body {
   display: flex;
   width: 95%; /* Ancho total del contenedor principal */
   height: 90%; /* Altura total del contenedor principal */
-  min-width: 95vw; /* Ancho máximo para el diseño de dos columnas */
+  min-width: 96vw; /* Ancho máximo para el diseño de dos columnas */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   border-radius: 15px;
   overflow: hidden;
@@ -53,7 +53,7 @@ html, body {
   background-color: #28a745; /* Color verde para el botón de descarga */
   color: white;
   border: none;
-  padding: 0px 15px;
+  padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -262,4 +262,11 @@ button:hover {
   padding-left: 1.5em; /* Alinea el contenido con el texto de la etiqueta */
   margin-top: 0.5rem;
   color: #444;
+}
+
+#loading-indicator {
+  text-align: center;
+  padding: 10px;
+  color: #888;
+  font-style: italic;
 }

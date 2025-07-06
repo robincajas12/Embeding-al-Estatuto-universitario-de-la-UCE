@@ -12,10 +12,11 @@
     <div class="chat-container">
       <header>Chat en vivo</header>
       <ul id="messages"></ul>
+      <div id="loading-indicator" style="display: none; text-align: center; padding: 10px; color: #888;">La IA está escribiendo...</div>
 
       <form id="form" autocomplete="off">
         <input id="input" placeholder="Escribe un mensaje..." />
-        <button type="submit">Enviar</button>
+      <button id="send-button" type="submit">Enviar</button>
       </form>
     </div>
     <div class="document-display-area">
@@ -35,6 +36,8 @@
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
     const documentContent = document.getElementById('document-content');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const sendButton = document.getElementById('send-button');
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -43,40 +46,49 @@
         addMessage(msg, 'self');
         socket.emit('chat message', msg);
         input.value = '';
+        loadingIndicator.style.display = 'block'; // Mostrar indicador de carga
+        input.disabled = true; // Deshabilitar input
+        sendButton.disabled = true; // Deshabilitar botón
       }
     });
 
     socket.on('chat message', function (msg) {
+      loadingIndicator.style.display = 'none'; // Ocultar indicador de carga
+      input.disabled = false; // Habilitar input
+      sendButton.disabled = false; // Habilitar botón
       addMessage(msg, 'other');
     });
 
     function addMessage(msg, type) {
-      if (type === 'other') {
-        try {
-          const data = typeof msg === 'string' ? JSON.parse(msg) : msg;
-
-          if (data && data.explanation && Array.isArray(data.docs)) {
-            // Añadir la explicación al chat
-            const explanationLi = document.createElement('li');
-            explanationLi.className = type;
-            explanationLi.textContent = data.explanation;
-            messages.appendChild(explanationLi);
-
-            // Limpiar y añadir los documentos al área de documentos
-            documentContent.innerHTML = '';
-            documentContent.innerHTML = renderStructuredDocs(data.docs);
-
-            messages.scrollTop = messages.scrollHeight;
-            return; // No añadir el mensaje JSON completo al chat
-          }
-        } catch (e) {
-          // Si no es JSON válido, se trata como un mensaje normal
-        }
-      }
-
       const li = document.createElement('li');
       li.className = type;
-      li.textContent = msg;
+
+      if (type === 'other') {
+        let data;
+        try {
+          data = typeof msg === 'string' ? JSON.parse(msg) : msg;
+
+          if (data && data.explanation && Array.isArray(data.docs)) {
+            // Set the chat message content to the explanation
+            li.textContent = data.explanation;
+
+            // Clear and add documents to the document area
+            documentContent.innerHTML = '';
+            documentContent.innerHTML = renderStructuredDocs(data.docs);
+          } else {
+            // If it's 'other' but not structured JSON, display the raw message
+            li.textContent = msg;
+          }
+        } catch (e) {
+          // If parsing fails, display the raw message
+          console.error("Error parsing AI response or unexpected format:", e);
+          li.textContent = msg;
+        }
+      } else {
+        // For 'self' messages, just set the text content
+        li.textContent = msg;
+      }
+
       messages.appendChild(li);
       messages.scrollTop = messages.scrollHeight;
     }
